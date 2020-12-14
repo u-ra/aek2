@@ -107,50 +107,50 @@ ALL_CXXFLAGS = $(CXXFLAGS) $(GENDEPFLAGS)
 
 
 # Default target.
-all : $(TARGET).hex
+all: $(TARGET).hex
 
-docs : $(CSRC) $(CXXSRC)
+docs: $(CSRC) $(CXXSRC)
 	@echo "----  Building documentation  ----"
 	$(DOXYGEN)
 	@echo
 
 # install on the device
-load : $(TARGET).hex
+load: $(TARGET).hex
 	@echo "----  Loading \"$<\" onto device  ----"
 	$(LOADER) -mmcu=$(MCU) -w -v $<
 	@echo
 
-check : $(TARGET).elf
+check: $(TARGET).elf
 	@echo "----  Reporting statistics of \"$<\"  ----"
 	$(CHECKER) $< $(MCU)
 	@echo
 
 # Create final output files (.hex, .eep) from ELF output file.
-%.hex : %.elf
+%.hex: %.elf
 	@echo "----  Building \"$@\" from \"$<\"  ----"
 	$(OBJCOPY) -O ihex -R .eeprom -R .fuse -R .lock -R .signature $< $@
 	@echo
 
 # Link: create ELF output file from object files.
-%.elf : $(OBJ)
+%.elf: $(OBJ)
 	@echo "----  Building \"$@\" from \"$<\"  ----"
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
 	@echo
 
 # Compile: create object files from C source files.
-%.o : %.c
+%.o: %.c
 	@echo "----  Building \"$@\" from \"$<\"  ----"
 	$(CC) -c $(ALL_CFLAGS) $< -o $@ 
 	@echo
 
 # Compile: create object files from C++ source files.
-%.o : %.cc
+%.o: %.cc
 	@echo "----  Building \"$@\" from \"$<\"  ----"
 	$(CXX) -c $(ALL_CXXFLAGS) $< -o $@ 
 	@echo
 
 # Target: clean project.
-clean :
+clean:
 	@echo "----  Cleaning  ----"
 	$(REMOVE) $(TARGET).hex
 	$(REMOVE) $(TARGET).elf
@@ -166,4 +166,4 @@ clean :
 
 
 # Listing of phony targets.
-.PHONY : all load check hex clean
+.PHONY: all load check hex clean
