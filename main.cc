@@ -1365,9 +1365,9 @@ int main() {
 		bool const capsLock   = keyboard.GetLED( USB::HID::LED_CAPS_LOCK   );
 		bool const scrollLock = keyboard.GetLED( USB::HID::LED_SCROLL_LOCK );
 		PORTB = ( ( PORTB & ~0x07 ) | (
-			( numLock    ? 4 : 0 ) |
+			( numLock    ? 1 : 0 ) |
 			( capsLock   ? 2 : 0 ) |
-			( scrollLock ? 1 : 0 )
+			( scrollLock ? 4 : 0 )
 		) );
 		adb.SetLEDs(
 			( numLock    ? ADB::LED_NUM_LOCK    : 0 ) |
