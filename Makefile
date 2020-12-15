@@ -88,7 +88,7 @@ REMOVE = rm -f
 REMOVEDIR = rm -rf
 COPY = cp
 DOXYGEN = doxygen
-LOADER = ./teensy_loader_cli
+LOADER = teensy-loader-cli
 CHECKER = ./avr-mem.sh
 
 
