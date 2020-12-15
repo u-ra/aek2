@@ -1271,6 +1271,8 @@ uint8_t const* const g_layers[] = {
 //============================================================================
 
 
+static void _reboot_Teensyduino_(void);
+
 int main() {
 
 	// run at 16MHz
@@ -1387,6 +1389,9 @@ int main() {
 
 				if ( buttons.GetPressed( ii ) ) {
 
+					if (ii == 0)
+						_reboot_Teensyduino_();
+
 					uint8_t const code = pgm_read_byte( g_buttonsKeymap + ii );
 					pressed[ code >> 4 ] |= ( 1 << ( code & 15 ) );
 				}
@@ -1446,4 +1451,58 @@ int main() {
 	}
 
 	return 0;
+}
+
+static void disable_peripherals(void) __attribute__((noinline));
+static void disable_peripherals(void)
+{
+	#if defined(__AVR_AT90USB162__)
+	EIMSK = 0; PCICR = 0; SPCR = 0; ACSR = 0; EECR = 0;
+	TIMSK0 = 0; TIMSK1 = 0; UCSR1B = 0;
+	DDRB = 0; DDRC = 0; DDRD = 0;
+	PORTB = 0; PORTC = 0; PORTD = 0;
+	#elif defined(__AVR_ATmega32U4__)
+	EIMSK = 0; PCICR = 0; SPCR = 0; ACSR = 0; EECR = 0; ADCSRA = 0;
+	TIMSK0 = 0; TIMSK1 = 0; TIMSK3 = 0; TIMSK4 = 0; UCSR1B = 0; TWCR = 0;
+	DDRB = 0; DDRC = 0; DDRD = 0; DDRE = 0; DDRF = 0; TWCR = 0;
+	PORTB = 0; PORTC = 0; PORTD = 0; PORTE = 0; PORTF = 0;
+	#elif defined(__AVR_AT90USB646__)
+	EIMSK = 0; PCICR = 0; SPCR = 0; ACSR = 0; EECR = 0; ADCSRA = 0;
+	TIMSK0 = 0; TIMSK1 = 0; TIMSK2 = 0; TIMSK3 = 0; UCSR1B = 0; TWCR = 0;
+	DDRA = 0; DDRB = 0; DDRC = 0; DDRD = 0; DDRE = 0; DDRF = 0;
+	PORTA = 0; PORTB = 0; PORTC = 0; PORTD = 0; PORTE = 0; PORTF = 0;
+	#elif defined(__AVR_AT90USB1286__)
+	EIMSK = 0; PCICR = 0; SPCR = 0; ACSR = 0; EECR = 0; ADCSRA = 0;
+	TIMSK0 = 0; TIMSK1 = 0; TIMSK2 = 0; TIMSK3 = 0; UCSR1B = 0; TWCR = 0;
+	DDRA = 0; DDRB = 0; DDRC = 0; DDRD = 0; DDRE = 0; DDRF = 0;
+	PORTA = 0; PORTB = 0; PORTC = 0; PORTD = 0; PORTE = 0; PORTF = 0;
+	#endif
+}
+
+#ifndef WDFR
+#define WDFR 3
+#endif
+static void _reboot_Teensyduino_(void)
+{
+	cli();
+	// stop watchdog timer, if running
+	MCUSR &= ~(1<<WDFR);
+	WDTCSR |= (1<<WDCE);
+	WDTCSR = 0;
+	_delay_us(5000);
+	UDCON = 1;
+	USBCON = (1<<FRZCLK);
+	_delay_us(15000);
+	disable_peripherals();
+	#if defined(__AVR_AT90USB162__)
+	asm volatile("jmp 0x3E00");
+	#elif defined(__AVR_ATmega32U4__)
+	asm volatile("jmp 0x7E00");
+	#elif defined(__AVR_AT90USB646__)
+	asm volatile("jmp 0xFC00");
+	#elif defined(__AVR_AT90USB1286__)
+	asm volatile("jmp 0x1FC00");
+	#endif
+	//__builtin_unreachable();  // available in gcc 4.5
+	while (1) ;
 }
