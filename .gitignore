@@ -5,7 +5,6 @@ aek2.elf
 aek2.hex
 aek2.map
 buttons.o
-compile_commands.json
 cplusplus_helpers.o
 keyboard_matrix.o
 keymap.o
